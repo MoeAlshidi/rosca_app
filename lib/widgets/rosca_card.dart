@@ -4,22 +4,20 @@ import '../models/rosca.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_constants.dart';
 import '../views/rosca/rosca_detail_screen.dart';
-import '../views/profile/user_details_screen.dart';
 
 class RoscaCard extends StatelessWidget {
   final Rosca rosca;
-  final Color backgroundColor;
 
   const RoscaCard({
     super.key,
     required this.rosca,
-    required this.backgroundColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormatter = NumberFormat.currency(symbol: '${rosca.currency} ');
-    
+    final currencyFormatter =
+        NumberFormat.currency(symbol: '${rosca.currency} ');
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -31,33 +29,46 @@ class RoscaCard extends StatelessWidget {
       },
       child: Container(
         width: 280,
+        margin: const EdgeInsets.only(bottom: 8),
         decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-          border: Border.all(color: AppColors.cardBorder),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(AppConstants.paddingMedium),
+          padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
+              // Header with status - compact
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppConstants.paddingSmall,
-                      vertical: 4,
-                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: _getCategoryColor(),
-                      borderRadius: BorderRadius.circular(6),
+                      color: _getStatusColor().withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                          color: _getStatusColor().withOpacity(0.3), width: 1),
                     ),
                     child: Text(
-                      rosca.categoryDisplay,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: AppConstants.fontSizeSmall,
+                      rosca.isUserMember
+                          ? 'JOINED'
+                          : rosca.statusDisplay.toUpperCase(),
+                      style: TextStyle(
+                        color: _getStatusColor(),
+                        fontSize: 9,
                         fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
@@ -65,74 +76,144 @@ class RoscaCard extends StatelessWidget {
                   if (rosca.isFull)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: AppConstants.paddingSmall,
-                        vertical: 4,
-                      ),
+                          horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: AppColors.error,
-                        borderRadius: BorderRadius.circular(6),
+                        color: Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(4),
+                        border:
+                            Border.all(color: Colors.red.shade200, width: 1),
                       ),
-                      child: const Text(
+                      child: Text(
                         'FULL',
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: AppConstants.fontSizeSmall,
+                          color: Colors.red.shade700,
+                          fontSize: 9,
                           fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
                         ),
                       ),
                     ),
                 ],
               ),
-              const SizedBox(height: AppConstants.paddingMedium),
-              Text(
-                currencyFormatter.format(rosca.amount),
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: AppConstants.fontSizeXXLarge,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${rosca.durationDisplay} • ${rosca.fees} ${rosca.currency} fees',
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: AppConstants.fontSizeMedium,
-                ),
-              ),
-              const SizedBox(height: AppConstants.paddingMedium),
-                             Row(
-                 children: [
-                   _buildMemberAvatars(context),
-                   const SizedBox(width: AppConstants.paddingSmall),
-                  Text(
-                    '${rosca.members.length} Members',
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: AppConstants.fontSizeSmall,
+
+              const SizedBox(height: 8),
+
+              // Title and amount in same row to save space
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          rosca.title,
+                          style: const TextStyle(
+                            color: Color(0xFF1A1A1A),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            height: 1.1,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          rosca.durationDisplay,
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const Spacer(),
+                  const SizedBox(width: 8),
                   Text(
-                    '${rosca.availableSlots} free slot${rosca.availableSlots != 1 ? 's' : ''}',
+                    currencyFormatter.format(rosca.amount),
                     style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: AppConstants.fontSizeSmall,
+                      color: Color(0xFF2563EB),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      height: 1,
                     ),
                   ),
                 ],
               ),
-              if (rosca.nextPaymentDate != null && rosca.isUserMember) ...[
-                const SizedBox(height: AppConstants.paddingSmall),
-                Text(
-                  'Next payment: ${DateFormat('MMM dd').format(rosca.nextPaymentDate!)}',
-                  style: const TextStyle(
-                    color: AppColors.primary,
-                    fontSize: AppConstants.fontSizeSmall,
-                    fontWeight: FontWeight.w600,
+
+              const SizedBox(height: 8),
+
+              // Bottom info - simplified
+              Row(
+                children: [
+                  // Members count
+                  Icon(
+                    Icons.people_outline,
+                    color: Colors.grey.shade500,
+                    size: 12,
                   ),
-                ),
-              ],
+                  const SizedBox(width: 3),
+                  Text(
+                    '${rosca.members.length}/${rosca.totalSlots}',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  // Fees
+                  Text(
+                    '${currencyFormatter.format(rosca.fees)} fees',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  // Status indicator
+                  if (rosca.isUserMember && rosca.userInfo != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2563EB).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '#${rosca.userInfo!.cyclePosition}',
+                        style: const TextStyle(
+                          color: Color(0xFF2563EB),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    )
+                  else if (rosca.availableSlots > 0)
+                    Text(
+                      '${rosca.availableSlots} left',
+                      style: TextStyle(
+                        color: Colors.green.shade600,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    )
+                  else
+                    Text(
+                      'Full',
+                      style: TextStyle(
+                        color: Colors.grey.shade500,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                ],
+              ),
             ],
           ),
         ),
@@ -140,79 +221,20 @@ class RoscaCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMemberAvatars(BuildContext context) {
-    const maxDisplay = 3;
-    final displayMembers = rosca.members.take(maxDisplay).toList();
-    final remainingCount = rosca.members.length - maxDisplay;
+  Color _getStatusColor() {
+    if (rosca.isUserMember) {
+      return const Color(0xFF2563EB); // Blue for joined
+    }
 
-    return SizedBox(
-      width: maxDisplay * 16.0 + (remainingCount > 0 ? 16.0 : 0),
-      height: 24,
-      child: Stack(
-        children: [
-          ...displayMembers.asMap().entries.map((entry) {
-            final index = entry.key;
-            final member = entry.value;
-            return Positioned(
-              left: index * 16.0,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const UserDetailsScreen(),
-                    ),
-                  );
-                },
-                child: CircleAvatar(
-                  radius: 12,
-                  backgroundColor: AppColors.cardBorder,
-                  backgroundImage: member.profileImage != null
-                      ? NetworkImage(member.profileImage!)
-                      : null,
-                  child: member.profileImage == null
-                      ? Text(
-                          member.name.substring(0, 1).toUpperCase(),
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        )
-                      : null,
-                ),
-              ),
-            );
-          }),
-          if (remainingCount > 0)
-            Positioned(
-              left: maxDisplay * 16.0,
-              child: CircleAvatar(
-                radius: 12,
-                backgroundColor: AppColors.textLight,
-                child: Text(
-                  '+$remainingCount',
-                  style: const TextStyle(
-                    fontSize: 8,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Color _getCategoryColor() {
-    switch (rosca.category) {
-      case RoscaCategory.recommend:
-        return AppColors.warning;
-      case RoscaCategory.highDemand:
-        return AppColors.error;
-      case RoscaCategory.discoverMore:
-        return AppColors.secondary;
+    switch (rosca.status) {
+      case RoscaStatus.upcoming:
+        return Colors.orange.shade600;
+      case RoscaStatus.active:
+        return Colors.green.shade600;
+      case RoscaStatus.completed:
+        return Colors.grey.shade600;
+      case RoscaStatus.cancelled:
+        return Colors.red.shade600;
     }
   }
-} 
+}

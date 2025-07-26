@@ -20,7 +20,8 @@ class JoinConfirmationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormatter = NumberFormat.currency(symbol: '${rosca.currency} ');
+    final currencyFormatter =
+        NumberFormat.currency(symbol: '${rosca.currency} ');
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -68,7 +69,8 @@ class JoinConfirmationScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(AppConstants.paddingMedium),
                 decoration: BoxDecoration(
                   color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                  borderRadius:
+                      BorderRadius.circular(AppConstants.borderRadius),
                   border: Border.all(color: AppColors.cardBorder),
                 ),
                 child: Column(
@@ -78,17 +80,19 @@ class JoinConfirmationScreen extends StatelessWidget {
                       children: [
                         Text(
                           'Payment:',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: AppColors.textPrimary,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: AppColors.textPrimary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                         Text(
                           currencyFormatter.format(rosca.amount),
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: AppColors.textPrimary,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: AppColors.textPrimary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                       ],
                     ),
@@ -98,15 +102,17 @@ class JoinConfirmationScreen extends StatelessWidget {
                       children: [
                         Text(
                           'Fees (${rosca.fees} ${rosca.currency}):',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                         ),
                         Text(
                           currencyFormatter.format(rosca.fees),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                         ),
                       ],
                     ),
@@ -116,17 +122,19 @@ class JoinConfirmationScreen extends StatelessWidget {
                       children: [
                         Text(
                           'Total:',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: AppColors.textPrimary,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: AppColors.textPrimary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                         Text(
                           currencyFormatter.format(rosca.amount + rosca.fees),
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                       ],
                     ),
@@ -135,11 +143,13 @@ class JoinConfirmationScreen extends StatelessWidget {
               ),
               const SizedBox(height: AppConstants.paddingMedium),
               Container(
-                margin: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
+                margin: const EdgeInsets.symmetric(
+                    horizontal: AppConstants.paddingMedium),
                 padding: const EdgeInsets.all(AppConstants.paddingMedium),
                 decoration: BoxDecoration(
                   color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                  borderRadius:
+                      BorderRadius.circular(AppConstants.borderRadius),
                   border: Border.all(color: AppColors.cardBorder),
                 ),
                 child: Row(
@@ -152,16 +162,21 @@ class JoinConfirmationScreen extends StatelessWidget {
                         children: [
                           Text(
                             'Selected Slot',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
                                   color: AppColors.textSecondary,
                                 ),
                           ),
                           Text(
-                            DateFormat('MMMM dd, yyyy').format(selectedSlot.date),
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  color: AppColors.textPrimary,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            DateFormat('MMMM dd, yyyy')
+                                .format(selectedSlot.date),
+                            style:
+                                Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      color: AppColors.textPrimary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                           ),
                         ],
                       ),
@@ -182,7 +197,6 @@ class JoinConfirmationScreen extends StatelessWidget {
                           onPressed: () {
                             context.read<RoscaCubit>().joinRosca(
                                   rosca.id,
-                                  selectedSlot.id,
                                 );
                           },
                         );
@@ -203,4 +217,4 @@ class JoinConfirmationScreen extends StatelessWidget {
       ),
     );
   }
-} 
+}

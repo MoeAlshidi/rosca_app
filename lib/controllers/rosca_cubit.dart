@@ -50,65 +50,132 @@ class RoscaError extends RoscaState {
 
 class RoscaJoining extends RoscaState {}
 
-class RoscaJoined extends RoscaState {}
+class RoscaJoined extends RoscaState {
+  final Rosca joinedRosca;
+
+  RoscaJoined(this.joinedRosca);
+
+  @override
+  List<Object?> get props => [joinedRosca];
+}
+
+class RoscaCreating extends RoscaState {}
+
+class RoscaCreated extends RoscaState {
+  final Rosca createdRosca;
+
+  RoscaCreated(this.createdRosca);
+
+  @override
+  List<Object?> get props => [createdRosca];
+}
 
 class RoscaCubit extends Cubit<RoscaState> {
   final ApiService _apiService;
+  List<Rosca> _allRoscas = [];
+  List<Rosca> _userRoscas = [];
+  List<Rosca> _availableRoscas = [];
 
   RoscaCubit(this._apiService) : super(RoscaInitial());
 
   Future<void> loadRoscas() async {
     emit(RoscaLoading());
     try {
-      final userRoscas = await _apiService.getUserRoscas();
-      final availableRoscas = await _apiService.getAvailableRoscas();
-      
+      final roscas = await _apiService.getRoscas();
+      _allRoscas = roscas;
+      _userRoscas = roscas.where((rosca) => rosca.isUserMember).toList();
+      _availableRoscas = roscas
+          .where((rosca) => !rosca.isUserMember && !rosca.isFull)
+          .toList();
+
       emit(RoscaLoaded(
-        userRoscas: userRoscas,
-        availableRoscas: availableRoscas,
+        userRoscas: _userRoscas,
+        availableRoscas: _availableRoscas,
       ));
     } catch (e) {
-      emit(RoscaError('Failed to load ROSCAs: ${e.toString()}'));
+      emit(RoscaError('Failed to load ROSCAs: $e'));
     }
   }
 
-  Future<void> filterByDuration(RoscaDuration duration) async {
-    final currentState = state;
-    if (currentState is RoscaLoaded) {
-      emit(RoscaLoading());
-      try {
-        final availableRoscas = await _apiService.getAvailableRoscas(
-          duration: duration,
-        );
-        
-        emit(currentState.copyWith(
-          availableRoscas: availableRoscas,
-          selectedDuration: duration,
-        ));
-      } catch (e) {
-        emit(RoscaError('Failed to filter ROSCAs: ${e.toString()}'));
-      }
-    }
-  }
-
-  Future<void> joinRosca(String roscaId, String slotId) async {
-    emit(RoscaJoining());
-    try {
-      await _apiService.joinRosca(roscaId, slotId);
-      emit(RoscaJoined());
-      await loadRoscas();
-    } catch (e) {
-      emit(RoscaError('Failed to join ROSCA: ${e.toString()}'));
-    }
-  }
-
-  Future<void> leaveRosca(String roscaId) async {
+  Future<void> loadUserRoscas() async {
     emit(RoscaLoading());
     try {
-      await _apiService.leaveRosca(roscaId);
+      final userRoscas = await _apiService.getUserRoscas();
+      _userRoscas = userRoscas;
+
+      emit(RoscaLoaded(
+        userRoscas: _userRoscas,
+        availableRoscas: _availableRoscas,
+      ));
+    } catch (e) {
+      emit(RoscaError('Failed to load user ROSCAs: $e'));
+    }
+  }
+
+  void filterByDuration(RoscaDuration duration) {
+    final currentState = state;
+    if (currentState is RoscaLoaded) {
+      final filteredAvailable = _availableRoscas
+          .where((rosca) => rosca.duration == duration)
+          .toList();
+
+      emit(currentState.copyWith(
+        availableRoscas: filteredAvailable,
+        selectedDuration: duration,
+      ));
+    }
+  }
+
+  // Join ROSCA without manual slot selection - backend assigns automatically
+  Future<void> joinRosca(String roscaId) async {
+    emit(RoscaJoining());
+    try {
+      final joinedRosca = await _apiService.joinRosca(roscaId);
+
+      // Update local state
+      _userRoscas.add(joinedRosca);
+      _availableRoscas.removeWhere((rosca) => rosca.id == roscaId);
+
+      emit(RoscaJoined(joinedRosca));
+
+      // Reload to get updated data
       await loadRoscas();
     } catch (e) {
-      emit(RoscaError('Failed to leave ROSCA: ${e.toString()}'));
+      emit(RoscaError('Failed to join ROSCA: $e'));
+    }
+  }
+
+  // Create new ROSCA
+  Future<void> createRosca({
+    required String title,
+    required double amount,
+    required String currency,
+    required RoscaDuration duration,
+    required int totalSlots,
+    required double fees,
+    String? description,
+  }) async {
+    emit(RoscaCreating());
+    try {
+      final createdRosca = await _apiService.createRosca(
+        title: title,
+        amount: amount,
+        currency: currency,
+        duration: duration,
+        totalSlots: totalSlots,
+        fees: fees,
+        description: description,
+      );
+
+      // Add to available ROSCAs
+      _availableRoscas.add(createdRosca);
+
+      emit(RoscaCreated(createdRosca));
+
+      // Reload to get updated data
+      await loadRoscas();
+    } catch (e) {
+      emit(RoscaError('Failed to create ROSCA: $e'));
     }
   }
 
@@ -121,4 +188,57 @@ class RoscaCubit extends Cubit<RoscaState> {
     }
     return [];
   }
-} 
+
+  List<Rosca> getUserRoscasByStatus(RoscaStatus status) {
+    return _userRoscas.where((rosca) => rosca.status == status).toList();
+  }
+
+  // Get upcoming payments for user
+  List<Rosca> getUpcomingPayments() {
+    final now = DateTime.now();
+    final upcoming = DateTime.now().add(const Duration(days: 7)); // Next 7 days
+
+    return _userRoscas.where((rosca) {
+      if (rosca.userInfo?.nextPaymentDate != null) {
+        final paymentDate = rosca.userInfo!.nextPaymentDate;
+        return paymentDate.isAfter(now) && paymentDate.isBefore(upcoming);
+      }
+      return false;
+    }).toList();
+  }
+
+  // Get ROSCAs where user is getting paid soon
+  List<Rosca> getUpcomingPayouts() {
+    final now = DateTime.now();
+    final upcoming =
+        DateTime.now().add(const Duration(days: 30)); // Next 30 days
+
+    return _userRoscas.where((rosca) {
+      if (rosca.userInfo?.payoutDate != null &&
+          !rosca.userInfo!.hasReceivedPayout) {
+        final payoutDate = rosca.userInfo!.payoutDate;
+        return payoutDate.isAfter(now) && payoutDate.isBefore(upcoming);
+      }
+      return false;
+    }).toList();
+  }
+
+  // Calculate total savings across all user ROSCAs
+  double getTotalSavingsGoal() {
+    return _userRoscas.fold(0.0, (sum, rosca) => sum + rosca.totalSavingGoal);
+  }
+
+  // Calculate total amount paid so far
+  double getTotalAmountPaid() {
+    return _userRoscas.fold(0.0, (sum, rosca) {
+      return sum + (rosca.userInfo?.totalPaid ?? 0.0);
+    });
+  }
+
+  // Calculate next payment amount due
+  double getNextPaymentAmount() {
+    final upcomingPayments = getUpcomingPayments();
+    return upcomingPayments.fold(
+        0.0, (sum, rosca) => sum + rosca.paymentPerCycle);
+  }
+}

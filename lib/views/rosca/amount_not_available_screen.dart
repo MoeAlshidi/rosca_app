@@ -77,7 +77,8 @@ class AmountNotAvailableScreen extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(AppConstants.paddingSmall),
+                        padding:
+                            const EdgeInsets.all(AppConstants.paddingSmall),
                         decoration: BoxDecoration(
                           color: AppColors.secondary.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
@@ -95,13 +96,19 @@ class AmountNotAvailableScreen extends StatelessWidget {
                           children: [
                             Text(
                               'Next payment',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
                                     color: AppColors.textSecondary,
                                   ),
                             ),
                             Text(
                               currencyFormatter.format(10000),
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
                                     color: AppColors.secondary,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -121,7 +128,8 @@ class AmountNotAvailableScreen extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(AppConstants.paddingSmall),
+                        padding:
+                            const EdgeInsets.all(AppConstants.paddingSmall),
                         decoration: BoxDecoration(
                           color: AppColors.secondary.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
@@ -139,13 +147,19 @@ class AmountNotAvailableScreen extends StatelessWidget {
                           children: [
                             Text(
                               'Next payment',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
                                     color: AppColors.textSecondary,
                                   ),
                             ),
                             Text(
                               currencyFormatter.format(6000),
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
                                     color: AppColors.secondary,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -180,13 +194,12 @@ class AmountNotAvailableScreen extends StatelessWidget {
                   itemBuilder: (context, index) {
                     return Padding(
                       padding: EdgeInsets.only(
-                        right: index < recommendedRoscas.length - 1 
-                            ? AppConstants.paddingMedium 
+                        right: index < recommendedRoscas.length - 1
+                            ? AppConstants.paddingMedium
                             : 0,
                       ),
                       child: RoscaCard(
                         rosca: recommendedRoscas[index],
-                        backgroundColor: AppColors.recommendCard,
                       ),
                     );
                   },
@@ -204,4 +217,4 @@ class AmountNotAvailableScreen extends StatelessWidget {
       ),
     );
   }
-} 
+}
